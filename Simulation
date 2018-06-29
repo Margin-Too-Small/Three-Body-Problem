@@ -1,0 +1,73 @@
+threeBodyTrajectories[{{x10_, y10_}, {x20_, y20_}, {x30_, 
+    y30_}}, {{vx10_, vy10_}, {vx20_, vy20_}, {vx30_, vy30_}}, {m1_, 
+   m2_, m3_}, T_, plotType : ("x" | "v"), plotOptions___] := 
+ Module[{nds, Tmax, prolog, funsToPlot}, 
+   nds = NDSolve[{x1'[t] == vx1[t], y1'[t] == vy1[t], 
+      x2'[t] == vx2[t], y2'[t] == vy2[t], x3'[t] == vx3[t], 
+      y3'[t] == vy3[t], 
+      m1 vx1'[t] == -((m1 m2 (x1[t] - 
+               x2[t]))/((x1[t] - x2[t])^2 + (y1[t] - y2[t])^2)^(3/
+              2)) - (m1 m3 (x1[t] - 
+             x3[t]))/((x1[t] - x3[t])^2 + (y1[t] - y3[t])^2)^(3/2), 
+      m1 vy1'[t] == -((m1 m2 (y1[t] - 
+               y2[t]))/((x1[t] - x2[t])^2 + (y1[t] - y2[t])^2)^(3/
+              2)) - (m1 m3 (y1[t] - 
+             y3[t]))/((x1[t] - x3[t])^2 + (y1[t] - y3[t])^2)^(3/2), 
+      m2 vx2'[t] == (m1 m2 (x1[t] - 
+             x2[t]))/((x1[t] - x2[t])^2 + (y1[t] - y2[t])^2)^(3/
+            2) - (m2 m3 (x2[t] - 
+             x3[t]))/((x2[t] - x3[t])^2 + (y2[t] - y3[t])^2)^(3/2), 
+      m2 vy2'[t] == (m1 m2 (y1[t] - 
+             y2[t]))/((x1[t] - x2[t])^2 + (y1[t] - y2[t])^2)^(3/
+            2) - (m2 m3 (y2[t] - 
+             y3[t]))/((x2[t] - x3[t])^2 + (y2[t] - y3[t])^2)^(3/2), 
+      m3 vx3'[t] == (m1 m3 (x1[t] - 
+             x3[t]))/((x1[t] - x3[t])^2 + (y1[t] - y3[t])^2)^(3/
+            2) + (m2 m3 (x2[t] - 
+             x3[t]))/((x2[t] - x3[t])^2 + (y2[t] - y3[t])^2)^(3/2), 
+      m3 vy3'[t] == (m1 m3 (y1[t] - 
+             y3[t]))/((x1[t] - x3[t])^2 + (y1[t] - y3[t])^2)^(3/
+            2) + (m2 m3 (y2[t] - 
+             y3[t]))/((x2[t] - x3[t])^2 + (y2[t] - y3[t])^2)^(3/2), 
+      x1[0] == x10, y1[0] == y10, x2[0] == x20, y2[0] == y20, 
+      x3[0] == x30, y3[0] == y30, vx1[0] == vx10, vy1[0] == vy10, 
+      vx2[0] == vx20, vy2[0] == vy20, vx3[0] == vx30, 
+      vy3[0] == vy30}, {x1, x2, x3, y1, y2, y3, vx1, vx2, vx3, vy1, 
+      vy2, vy3}, {t, 0, T}];
+   If[Head[nds] =!= NDSolve, Tmax = nds[[1, 1, 2, 1, 1, 2]];
+    funsToPlot = 
+     If[plotType === 
+        "x", {{x1[t], y1[t]}, {x2[t], y2[t]}, {x3[t], 
+         y3[t]}}, {{vx1[t], vy1[t]}, {vx2[t], vy2[t]}, {vx3[t], 
+         vy3[t]}}] /. nds[[1]];
+    prolog = {PointSize[0.01], 
+      Transpose[{{RGBColor[1, .2, 0], RGBColor[.5, .8, 0], 
+         RGBColor[.2, .6, 1]}, Point /@ (funsToPlot /. t -> 0)}]};
+    ParametricPlot[Evaluate[funsToPlot], {t, 0, Tmax}, 
+     PlotStyle -> {RGBColor[1, .2, 0], RGBColor[.5, .8, 0], 
+       RGBColor[.2, .6, 1]}, Frame -> False, PlotRange -> All, 
+     AspectRatio -> 1, Prolog -> prolog, Frame -> True, Axes -> False,
+      FrameTicks -> False, PlotTheme -> "Web", plotOptions], 
+    Text["Degenerate initial conditions."]]] // Quiet
+
+Manipulate[
+ threeBodyTrajectories[{xy10, xy20, xy30}, {vxy10, vxy20, 
+   vxy30}, {10^m1Exp, 10^m2Exp, 10^m3Exp}, T, xv, 
+  ImageSize -> {350, 350}], {{xv, "x", 
+   "position/velocity"}, {"x" -> "position", "v" -> "velocity"}}, {{T,
+    3, "time"}, 0.001, 
+  10}, {{xy10, {0.97000436, -0.24308753}, "Xi1"}, {-2, -2}, {2, 2}, 
+  ImageSize -> Small}, {{xy20, {-0.97000436, 0.24308753}, 
+   "Xi2"}, {-2, -2}, {2, 2}, 
+  ImageSize -> Small}, {{xy30, {0, 0}, "Xi3"}, {-2, -2}, {2, 2}, 
+  ImageSize -> Small}, {{vxy10, {0.93240737/2, 0.86473146/2}, 
+   "Vi1"}, {-2, -2}, {2, 2}, 
+  ImageSize -> Small}, {{vxy20, {0.93240737/2, 0.86473146/2}, 
+   "Vi2"}, {-2, -2}, {2, 2}, 
+  ImageSize -> Small}, {{vxy30, {-0.93240737, -0.86473146}, 
+   "Vi3"}, {-2, -2}, {2, 2}, 
+  ImageSize -> Small}, {{m1Exp, 0, "M1"}, -3, 
+  3}, {{m2Exp, 0, "M2"}, -3, 3}, {{m3Exp, 0, "M3"}, -3, 3}, 
+ ControlPlacement -> {Top, Top, Left, Left, Left, Right, Right, Right,
+    Bottom, Bottom, Bottom}, SaveDefinitions -> True, 
+ AutorunSequencing -> {3, 5, 7}]
